@@ -1,6 +1,6 @@
-name: Testes automatizados com Newman
+name: Testes do Postman e Publicação no GitHub Pages
 
-on: 
+on:
   push:
     branches:
       - main
@@ -9,11 +9,12 @@ on:
 jobs:
   run-postman-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: 📥 Clonar repositório
         uses: actions/checkout@v3
 
-      - name: 🔧 Instalar Node.js
+      - name: 💪 Instalar Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
@@ -21,5 +22,31 @@ jobs:
       - name: 📦 Instalar Newman
         run: npm install -g newman
 
-      - name: 🚀 Executar Collection do Postman
-        run: newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html
+      - name: 🚀 Executar Testes e Gerar Relatório HTML
+        run: newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html --reporter-html-export reports/newman-report.html
+
+      - name: 🚀 Configurar GitHub Pages
+        uses: actions/upload-artifact@v3
+        with:
+          name: newman-report
+          path: reports/newman-report.html
+
+  deploy-github-pages:
+    needs: run-postman-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositório
+        uses: actions/checkout@v3
+
+      - name: 📥 Baixar o Relatório Gerado
+        uses: actions/download-artifact@v3
+        with:
+          name: newman-report
+          path: reports
+
+      - name: 🚀 Publicar no GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: reports
