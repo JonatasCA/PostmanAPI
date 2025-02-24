@@ -1,0 +1,25 @@
+name: Testes automatizados com Newman
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-postman-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Clonar repositório
+        uses: actions/checkout@v3
+
+      - name: 🔧 Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Instalar Newman
+        run: npm install -g newman
+
+      - name: 🚀 Executar Collection do Postman
+        run: newman run PDIProjectEnviromentDEV.json -e PDIProjectCollection.json --reporters cli,html
