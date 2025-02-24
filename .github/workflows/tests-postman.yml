@@ -22,4 +22,4 @@ jobs:
         run: npm install -g newman
 
       - name: 🚀 Executar Collection do Postman
-        run: newman run PDIProjectEnviromentDEV.json -e PDIProjectCollection.json --reporters cli,html
+        run: newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html
