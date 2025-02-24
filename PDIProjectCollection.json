@@ -1,0 +1,2926 @@
+{
+	"info": {
+		"_postman_id": "9194f3e7-f47c-4a68-9bf9-03d28cb31f37",
+		"name": "PDI Project Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30251703"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "POST",
+					"item": [
+						{
+							"name": "createUser",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"createUser - Status code is 201 and response time is less than 2 sec\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+											"    pm.expect(pm.response.json()).to.have.property(\"id\");\r",
+											"    pm.expect(pm.response.json()).to.have.property(\"firstName\"); \r",
+											"    pm.expect(pm.response.json()).to.have.property(\"lastName\"); \r",
+											"    pm.expect(pm.response.json()).to.have.property(\"age\"); \r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"packages": {},
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"firstName\": \"{{$randomFirstName}}\",\r\n    \"lastName\": \"{{$randomLastName}} {{$randomLastName}}\",\r\n    \"age\": {{$randomInt}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/users/add",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"users",
+										"add"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "accessToken",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Cria requisição GET para obter usuários\r",
+											"const apiGetUsers = {\r",
+											"    url: pm.environment.get(\"URL\") + '/users/',\r",
+											"    method: 'GET',\r",
+											"    header: {\r",
+											"        'content-type': 'application/json',\r",
+											"    }\r",
+											"};\r",
+											"\r",
+											"pm.sendRequest(apiGetUsers, function (err, response) {\r",
+											"    //Pega um usuário aleatório do retorno da requisição\r",
+											"    let randomUser = response.json().users[Math.floor(Math.random() * response.json().users.length)];\r",
+											"    pm.collectionVariables.set(\"username\", randomUser.username);\r",
+											"    pm.collectionVariables.set(\"password\", randomUser.password);\r",
+											"    pm.collectionVariables.set(\"userId\", randomUser.id);\r",
+											"    console.log(randomUser)\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.collectionVariables.set(\"access_token\", jsonData[\"accessToken\"]);\r",
+											"\r",
+											"pm.test(\"accessToken - Status code is 200, body includes accessToken and response time is less than 2 sec \", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"    pm.expect(pm.response.json()).to.have.property(\"accessToken\"); \r",
+											"    pm.expect(pm.response.json().accessToken).to.equal(pm.collectionVariables.get(\"access_token\"));\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/auth/login",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "currentAuthUser",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"GET - currentAuthUser\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.id).to.equals(pm.collectionVariables.get(\"userId\"));\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"packages": {},
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/auth/me",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"auth",
+										"me"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "allUsers",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"GET - allUsers\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"    var jsonData = pm.response.json();\r",
+											"    console.log(jsonData.users[0]);\r",
+											"    pm.expect(jsonData).to.have.property(\"users\").that.is.an(\"array\"); // Verifica se tem um array de \"users\"\r",
+											"    pm.expect(jsonData.users.length).to.be.at.least(1); // Verifica se contém elementos no array\r",
+											"    if (jsonData.users.length > 0) {\r",
+											"        pm.expect(jsonData.users[0]).to.be.an(\"object\"); // Verifica se os elementos dentro do array são objetos\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/users",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "RBX",
+			"item": [
+				{
+					"name": "Clientes",
+					"item": [
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "Clientes - Cadastro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Cadastro OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se o retorno tem o código do cliente criado\r",
+													"    pm.expect(jsonData.result.CodigoCliente).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													"\r",
+													"\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"TipoPessoa\": \"F\",\r\n         \"CPF\": \"{{cpf}}\",\r\n         \"Nome\": \"{{$randomFirstName}} {{$randomLastName}}\",\r\n         \"Endereco\": \"{{$randomFullName}}\",\r\n         \"EndNumero\": \"{{numeroAleatorio4Casas}}\",\r\n         \"Bairro\": \"Centro\",\r\n         \"CodMunicipio\": \"4114807\",\r\n         \"UF\": \"PR\",\r\n         \"CEP\": \"86990000\",\r\n         \"TipoImpressao\": \"C\",\r\n         \"Email\": \"{{$randomEmail}}\",\r\n         \"TipoAssinante\": \"3\",\r\n         \"TipoConta\": \"POS\",\r\n         \"Contatos\": {\r\n            \"Contato\": [\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               },\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Cadastro CPF já existente na base",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Cadastro CPF já existente na base\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"TipoPessoa\": \"F\",\r\n         \"CPF\": \"39550652009\",\r\n         \"Nome\": \"{{$randomFirstName}} {{$randomLastName}}\",\r\n         \"Endereco\": \"{{$randomFullName}}\",\r\n         \"EndNumero\": \"{{numeroAleatorio4Casas}}\",\r\n         \"Bairro\": \"Centro\",\r\n         \"CodMunicipio\": \"4114807\",\r\n         \"UF\": \"PR\",\r\n         \"CEP\": \"86990000\",\r\n         \"TipoImpressao\": \"C\",\r\n         \"Email\": \"{{$randomEmail}}\",\r\n         \"TipoAssinante\": \"3\",\r\n         \"TipoConta\": \"POS\",\r\n         \"Contatos\": {\r\n            \"Contato\": [\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               },\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Cadastro campo obrigatório nulo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Cadastro campo obrigatório nulo\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"TipoPessoa\": \"F\",\r\n         \"CPF\": \"{{cpf}}\",\r\n         \"Nome\": null,\r\n         \"Endereco\": \"{{$randomFullName}}\",\r\n         \"EndNumero\": \"{{numeroAleatorio4Casas}}\",\r\n         \"Bairro\": \"Centro\",\r\n         \"CodMunicipio\": \"4114807\",\r\n         \"UF\": \"PR\",\r\n         \"CEP\": \"86990000\",\r\n         \"TipoImpressao\": \"C\",\r\n         \"Email\": \"{{$randomEmail}}\",\r\n         \"TipoAssinante\": \"3\",\r\n         \"TipoConta\": \"POS\",\r\n         \"Contatos\": {\r\n            \"Contato\": [\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               },\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Cadastro campo obrigatório vazio",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Cadastro campo obrigatório vazio\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"TipoPessoa\": \"F\",\r\n         \"CPF\": \"{{cpf}}\",\r\n         \"Nome\": \" \",\r\n         \"Endereco\": \"{{$randomFullName}}\",\r\n         \"EndNumero\": \"{{numeroAleatorio4Casas}}\",\r\n         \"Bairro\": \"Centro\",\r\n         \"CodMunicipio\": \"4114807\",\r\n         \"UF\": \"PR\",\r\n         \"CEP\": \"86990000\",\r\n         \"TipoImpressao\": \"C\",\r\n         \"Email\": \"{{$randomEmail}}\",\r\n         \"TipoAssinante\": \"3\",\r\n         \"TipoConta\": \"POS\",\r\n         \"Contatos\": {\r\n            \"Contato\": [\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               },\r\n               {\r\n                  \"Nome\": \"{{$randomFullName}}\",\r\n                  \"Tipo\": \"G\",\r\n                  \"Email\": \"{{$randomEmail}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Alteração",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Alteração OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se o retorno tem o código do cliente criado\r",
+													"    pm.expect(jsonData.result.Mensagem).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteAlteracao\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"Codigo\": 31,\r\n         \"Nome\": \"{{$randomFullName}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Alteração código inexistente",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Alteração código inexistente\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteAlteracao\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"Codigo\": 999999,\r\n         \"Nome\": \"{{$randomFullName}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Alteração campo obrigatório nulo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Alteração campo obrigatório nulo\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteAlteracao\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"Codigo\": 31,\r\n         \"Nome\": null\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Alteração campo obrigatório vazio",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Alteração campo obrigatório vazio\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ClienteAlteracao\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosCliente\": {\r\n         \"Codigo\": 31,\r\n         \"Nome\": \"\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "Clientes - Consulta",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Consulta OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o código do cliente\r",
+													"    pm.expect(jsonData.result[0].Codigo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaClientes\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Consulta com filtro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Consulta com filtro\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna a propriedade código\r",
+													"    pm.expect(jsonData.result[0].Codigo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaClientes\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\" : \"Nome = 'Douglas Couto'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Consulta com filtro inválido",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Consulta com filtro inválido\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													"\r",
+													"console.log(jsonData.erro_desc)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaClientes\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\" : \"Nome = Douglas Couto\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Código informado no filtro inexistente",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Código informado no filtro inexistente\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaClientes\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Codigo = 99999\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Clientes - Consulta grupos de clientes",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Clientes - Consulta grupos de clientes OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o nome do grupo\r",
+													"    pm.expect(jsonData.result[0].Nome).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaGruposCliente\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Contratos",
+					"item": [
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "Contratos - Ativa contrato",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Define variáveis aleatórias para nome, sobrenome, nome completo e e-mail usando funções do Postman\r",
+													"pm.collectionVariables.set(\"randomFirstName\", pm.variables.replaceIn(\"{{$randomFirstName}}\"));\r",
+													"pm.collectionVariables.set(\"randomLastName\", pm.variables.replaceIn(\"{{$randomLastName}}\"));\r",
+													"pm.collectionVariables.set(\"randomFullName\", pm.variables.replaceIn(\"{{$randomFullName}}\"));\r",
+													"pm.collectionVariables.set(\"randomEmail\", pm.variables.replaceIn(\"{{$randomEmail}}\"));\r",
+													"\r",
+													"// Remove variáveis anteriores da coleção para evitar conflitos de dados\r",
+													"pm.collectionVariables.unset(\"numeroPedido\");\r",
+													"pm.collectionVariables.unset(\"codigoClienteCadastro\");\r",
+													"pm.collectionVariables.unset(\"numeroContrato\");\r",
+													"\r",
+													"// Configuração da requisição para criar um novo cliente\r",
+													"const apiPostClientes = {\r",
+													"   url: pm.environment.get(\"URLRBXv1\"), // Obtém a URL da API do ambiente\r",
+													"   method: 'POST',\r",
+													"   header: {\r",
+													"      'content-type': 'application/json',\r",
+													"   },\r",
+													"   body: {\r",
+													"      mode: 'raw',\r",
+													"      raw: JSON.stringify({\r",
+													"         \"ClienteCadastro\": {\r",
+													"            \"Autenticacao\": {\r",
+													"               \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\") // Obtém a chave de integração do ambiente\r",
+													"            },\r",
+													"            \"DadosCliente\": {\r",
+													"               \"TipoPessoa\": \"F\",\r",
+													"               \"CPF\": pm.collectionVariables.get(\"cpf\"), // Usa um CPF armazenado anteriormente\r",
+													"               \"Nome\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"               \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"               \"EndNumero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"               \"Bairro\": \"Centro\",\r",
+													"               \"CodMunicipio\": \"4114807\",\r",
+													"               \"UF\": \"PR\",\r",
+													"               \"CEP\": \"86990000\",\r",
+													"               \"TipoImpressao\": \"C\",\r",
+													"               \"Email\": pm.collectionVariables.get(\"randomEmail\"),\r",
+													"               \"TipoAssinante\": \"3\",\r",
+													"               \"TipoConta\": \"POS\"\r",
+													"            }\r",
+													"         }\r",
+													"      })\r",
+													"   }\r",
+													"};\r",
+													"\r",
+													"// Envia a requisição para criar um cliente\r",
+													"pm.sendRequest(apiPostClientes, function (err, response) {\r",
+													"   if (err) {\r",
+													"      console.log(\"Erro na criação do cliente:\", err);\r",
+													"      return;\r",
+													"   }\r",
+													"\r",
+													"   // Obtém o código do cliente cadastrado na resposta da API\r",
+													"   var jsonData = response.json();\r",
+													"   var codigoClienteCadastro = jsonData.result.CodigoCliente;\r",
+													"   pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"   console.log(\"Cliente cadastrado:\", codigoClienteCadastro);\r",
+													"\r",
+													"   // Aguarda 3 segundos antes de fazer a próxima requisição\r",
+													"   setTimeout(function () {\r",
+													"      // Configuração da requisição para criar um pedido\r",
+													"      const apiPostPedido = {\r",
+													"         url: pm.environment.get(\"URLRBXv1\"),\r",
+													"         method: 'POST',\r",
+													"         header: {\r",
+													"            'content-type': 'application/json',\r",
+													"         },\r",
+													"         body: {\r",
+													"            mode: 'raw',\r",
+													"            raw: JSON.stringify({\r",
+													"               \"PedidoCadastro\": {\r",
+													"                  \"Autenticacao\": {\r",
+													"                     \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"                  },\r",
+													"                  \"DadosPedido\": {\r",
+													"                     \"Geral\": {\r",
+													"                        \"Cliente\": pm.collectionVariables.get(\"codigoClienteCadastro\"),\r",
+													"                        \"TipoCliente\": \"C\",\r",
+													"                        \"CicloFat\": \"1\",\r",
+													"                        \"Assinatura\": \"2023-12-01\",\r",
+													"                        \"Vendedor\": \"jonatas\",\r",
+													"                        \"Usuario\": \"jonatas\"\r",
+													"                     },\r",
+													"                     \"EnderecoInstalacao\": {\r",
+													"                        \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"                        \"Numero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"                        \"Bairro\": \"Centro\",\r",
+													"                        \"CodMunicipio\": \"4114807\",\r",
+													"                        \"UF\": \"PR\",\r",
+													"                        \"CEP\": \"86990000\"\r",
+													"                     },\r",
+													"                     \"EnderecoCobranca\": {\r",
+													"                        \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"                        \"Numero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"                        \"Bairro\": \"Jardim Alameda\",\r",
+													"                        \"CodMunicipio\": \"4114807\",\r",
+													"                        \"UF\": \"PR\",\r",
+													"                        \"CEP\": \"86990000\"\r",
+													"                     },\r",
+													"                     \"Itens\": {\r",
+													"                        \"ItemP\": {\r",
+													"                           \"Tipo\": \"P\",\r",
+													"                           \"Codigo\": \"1\",\r",
+													"                           \"InicioCobranca\": \"2023-12-01\",\r",
+													"                           \"AgruparCobranca\": \"S\",\r",
+													"                           \"DescPromoPrazo\": \"12\",\r",
+													"                           \"DescPromoValor\": -10,\r",
+													"                           \"DescPromoDesc\": \"DESCONTO PROMOCIONAL\"\r",
+													"                        }\r",
+													"                     }\r",
+													"                  }\r",
+													"               }\r",
+													"            })\r",
+													"         }\r",
+													"      };\r",
+													"\r",
+													"      // Envia a requisição para criar um pedido\r",
+													"      pm.sendRequest(apiPostPedido, function (err, response) {\r",
+													"         if (err) {\r",
+													"            console.log(\"Erro na criação do pedido:\", err);\r",
+													"            return;\r",
+													"         }\r",
+													"\r",
+													"         // Obtém o número do pedido cadastrado na resposta da API\r",
+													"         var jsonData = response.json();\r",
+													"         var numeroPedido = jsonData.result.NumeroPedido;\r",
+													"         pm.collectionVariables.set(\"numeroPedido\", numeroPedido);\r",
+													"         console.log(\"Pedido criado:\", numeroPedido);\r",
+													"\r",
+													"         // Aguarda 3 segundos antes de encerrar o pedido\r",
+													"         setTimeout(function () {\r",
+													"            const apiPostEncerraPedido = {\r",
+													"               url: pm.environment.get(\"URLRBXv2\"),\r",
+													"               method: 'POST',\r",
+													"               header: {\r",
+													"                  'content-type': 'application/json',\r",
+													"                  'authentication_key': pm.environment.get(\"chave_acesso\"),\r",
+													"               },\r",
+													"               body: {\r",
+													"                  mode: 'raw',\r",
+													"                  raw: JSON.stringify({\r",
+													"                     \"order_finish\": {\r",
+													"                        \"order_id\": pm.collectionVariables.get(\"numeroPedido\")\r",
+													"                     }\r",
+													"                  })\r",
+													"               }\r",
+													"            };\r",
+													"\r",
+													"            // Envia a requisição para encerrar o pedido\r",
+													"            pm.sendRequest(apiPostEncerraPedido, function (err, response) {\r",
+													"               if (err) {\r",
+													"                  console.log(\"Erro ao encerrar o pedido:\", err);\r",
+													"                  return;\r",
+													"               }\r",
+													"\r",
+													"               console.log(\"Pedido encerrado:\", response.json());\r",
+													"\r",
+													"               // Aguarda 3 segundos antes de gerar o contrato\r",
+													"               setTimeout(function () {\r",
+													"                  const apiPostGeraContratoPedido = {\r",
+													"                     url: pm.environment.get(\"URLRBXv2\"),\r",
+													"                     method: 'POST',\r",
+													"                     header: {\r",
+													"                        'content-type': 'application/json',\r",
+													"                        'authentication_key': pm.environment.get(\"chave_acesso\"),\r",
+													"                     },\r",
+													"                     body: {\r",
+													"                        mode: 'raw',\r",
+													"                        raw: JSON.stringify({\r",
+													"                           \"order_generate_contracts\": {\r",
+													"                              \"order_id\": pm.collectionVariables.get(\"numeroPedido\")\r",
+													"                           }\r",
+													"                        })\r",
+													"                     }\r",
+													"                  };\r",
+													"\r",
+													"                  // Envia a requisição para gerar o contrato do pedido\r",
+													"                  pm.sendRequest(apiPostGeraContratoPedido, function (err, response) {\r",
+													"                     if (err) {\r",
+													"                        console.log(\"Erro ao gerar contrato:\", err);\r",
+													"                        return;\r",
+													"                     }\r",
+													"\r",
+													"                     console.log(\"Contrato gerado:\", response.json());\r",
+													"\r",
+													"                     // Aguarda 3 segundos antes de consultar os contratos do cliente\r",
+													"                     setTimeout(function () {\r",
+													"                        const apiGetConsultaContratos = {\r",
+													"                           url: pm.environment.get(\"URLRBXv1\"),\r",
+													"                           method: 'GET',\r",
+													"                           header: {\r",
+													"                              'content-type': 'application/json',\r",
+													"                           },\r",
+													"                           body: {\r",
+													"                              mode: 'raw',\r",
+													"                              raw: JSON.stringify({\r",
+													"                                 \"ConsultaContratos\": {\r",
+													"                                    \"Autenticacao\": {\r",
+													"                                       \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"                                    },\r",
+													"                                    \"Filtro\": \"Cliente_Codigo = \" + pm.collectionVariables.get(\"codigoClienteCadastro\")\r",
+													"                                 }\r",
+													"                              })\r",
+													"                           }\r",
+													"                        };\r",
+													"\r",
+													"                        // Envia a requisição para consultar contratos do cliente\r",
+													"                        pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"                           if (err) {\r",
+													"                              console.log(\"Erro ao consultar contratos:\", err);\r",
+													"                              return;\r",
+													"                           }\r",
+													"\r",
+													"                           var jsonData = response.json();\r",
+													"                           var numeroContrato = jsonData.result[0].Numero;\r",
+													"                           console.log(\"Consulta Contratos:\", numeroContrato);\r",
+													"                           pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"                        });\r",
+													"                     }, 3000);\r",
+													"                  });\r",
+													"               }, 3000);\r",
+													"            });\r",
+													"         }, 3000);\r",
+													"      });\r",
+													"   }, 3000);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Ativa contrato\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se o retorno tem o código do cliente criado\r",
+													"    pm.expect(jsonData.result).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_activate\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}}\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Ativa contrato situação inválida",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"   const apiGetConsultaContratos = {\r",
+													"      url: pm.environment.get(\"URLRBXv1\"),\r",
+													"      method: 'GET',\r",
+													"      header: {\r",
+													"         'content-type': 'application/json',\r",
+													"      },\r",
+													"      body: {\r",
+													"         mode: 'raw',\r",
+													"         raw: JSON.stringify({\r",
+													"            \"ConsultaContratos\": {\r",
+													"               \"Autenticacao\": {\r",
+													"                  \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"               },\r",
+													"               \"Filtro\": \"Situacao_Codigo in ('A', 'B', 'C', 'T')\"\r",
+													"            }\r",
+													"         })\r",
+													"      }\r",
+													"   };\r",
+													"\r",
+													"   pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"      if (err) {\r",
+													"         console.log(\"Erro ao consultar contratos:\", err);\r",
+													"         return;\r",
+													"      }\r",
+													"    var jsonData = response.json();\r",
+													"    // Verifica se há dados na chave \"result\"\r",
+													"    if (jsonData.result && jsonData.result.length > 0) {\r",
+													"        // Escolhe um índice aleatório dentro do array de resultados\r",
+													"        var randomIndex = Math.floor(Math.random() * jsonData.result.length);\r",
+													"    \r",
+													"        // Obtém o registro aleatório\r",
+													"        var randomRecord = jsonData.result[randomIndex];\r",
+													"    \r",
+													"        // Obtém os valores desejados\r",
+													"        var codigoClienteCadastro = randomRecord.Cliente_Codigo;\r",
+													"        var numeroContrato = randomRecord.Numero;\r",
+													"    \r",
+													"        // Salva nas variáveis globais do Postman\r",
+													"        pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"        pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"    \r",
+													"        // Log para verificação\r",
+													"        console.log(\"Registro selecionado aleatoriamente:\", randomRecord);\r",
+													"        console.log(\"Cliente_Codigo:\", codigoClienteCadastro);\r",
+													"        console.log(\"Numero:\", numeroContrato);\r",
+													"    } else {\r",
+													"        console.log(\"Nenhum resultado encontrado.\");\r",
+													"}\r",
+													"\r",
+													"\r",
+													"   });"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Ativa contrato situação inválida\", function () {\r",
+													"    //Valida se o retorno foi 412\r",
+													"    pm.response.to.have.status(412);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.error_description).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_activate\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}}\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Assinatura de contrato",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"   const apiGetConsultaContratos = {\r",
+													"      url: pm.environment.get(\"URLRBXv1\"),\r",
+													"      method: 'GET',\r",
+													"      header: {\r",
+													"         'content-type': 'application/json',\r",
+													"      },\r",
+													"      body: {\r",
+													"         mode: 'raw',\r",
+													"         raw: JSON.stringify({\r",
+													"            \"ConsultaContratos\": {\r",
+													"               \"Autenticacao\": {\r",
+													"                  \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"               },\r",
+													"               \"Filtro\": \"Assinado = 'Nao' and Situacao_Codigo = 'A'\"\r",
+													"            }\r",
+													"         })\r",
+													"      }\r",
+													"   };\r",
+													"\r",
+													"   pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"      if (err) {\r",
+													"         console.log(\"Erro ao consultar contratos:\", err);\r",
+													"         return;\r",
+													"      }\r",
+													"    var jsonData = response.json();\r",
+													"    // Verifica se há dados na chave \"result\"\r",
+													"    if (jsonData.result && jsonData.result.length > 0) {\r",
+													"        // Escolhe um índice aleatório dentro do array de resultados\r",
+													"        var randomIndex = Math.floor(Math.random() * jsonData.result.length);\r",
+													"    \r",
+													"        // Obtém o registro aleatório\r",
+													"        var randomRecord = jsonData.result[randomIndex];\r",
+													"    \r",
+													"        // Obtém os valores desejados\r",
+													"        var codigoClienteCadastro = randomRecord.Cliente_Codigo;\r",
+													"        var numeroContrato = randomRecord.Numero;\r",
+													"    \r",
+													"        // Salva nas variáveis globais do Postman\r",
+													"        pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"        pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"    \r",
+													"        // Log para verificação\r",
+													"        console.log(\"Registro selecionado aleatoriamente:\", randomRecord);\r",
+													"        console.log(\"Cliente_Codigo:\", codigoClienteCadastro);\r",
+													"        console.log(\"Numero:\", numeroContrato);\r",
+													"    } else {\r",
+													"        console.log(\"Nenhum resultado encontrado.\");\r",
+													"}\r",
+													"\r",
+													"\r",
+													"   });"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Assinatura de contrato\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se o retorno tem o código do cliente criado\r",
+													"    pm.expect(jsonData.result).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_signature\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}},\r\n      \"update_start_date\": false\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Assinatura de contrato já assinado",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"   const apiGetConsultaContratos = {\r",
+													"      url: pm.environment.get(\"URLRBXv1\"),\r",
+													"      method: 'GET',\r",
+													"      header: {\r",
+													"         'content-type': 'application/json',\r",
+													"      },\r",
+													"      body: {\r",
+													"         mode: 'raw',\r",
+													"         raw: JSON.stringify({\r",
+													"            \"ConsultaContratos\": {\r",
+													"               \"Autenticacao\": {\r",
+													"                  \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"               },\r",
+													"               \"Filtro\": \"Assinado = 'Sim'\"\r",
+													"            }\r",
+													"         })\r",
+													"      }\r",
+													"   };\r",
+													"\r",
+													"   pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"      if (err) {\r",
+													"         console.log(\"Erro ao consultar contratos:\", err);\r",
+													"         return;\r",
+													"      }\r",
+													"    var jsonData = response.json();\r",
+													"    // Verifica se há dados na chave \"result\"\r",
+													"    if (jsonData.result && jsonData.result.length > 0) {\r",
+													"        // Escolhe um índice aleatório dentro do array de resultados\r",
+													"        var randomIndex = Math.floor(Math.random() * jsonData.result.length);\r",
+													"    \r",
+													"        // Obtém o registro aleatório\r",
+													"        var randomRecord = jsonData.result[randomIndex];\r",
+													"    \r",
+													"        // Obtém os valores desejados\r",
+													"        var codigoClienteCadastro = randomRecord.Cliente_Codigo;\r",
+													"        var numeroContrato = randomRecord.Numero;\r",
+													"    \r",
+													"        // Salva nas variáveis globais do Postman\r",
+													"        pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"        pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"    \r",
+													"        // Log para verificação\r",
+													"        console.log(\"Registro selecionado aleatoriamente:\", randomRecord);\r",
+													"        console.log(\"Cliente_Codigo:\", codigoClienteCadastro);\r",
+													"        console.log(\"Numero:\", numeroContrato);\r",
+													"    } else {\r",
+													"        console.log(\"Nenhum resultado encontrado.\");\r",
+													"}\r",
+													"\r",
+													"\r",
+													"   });"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Assinatura de contrato já assinado\", function () {\r",
+													"    //Valida se o retorno foi 412\r",
+													"    pm.response.to.have.status(412);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.error_description).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_signature\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}},\r\n      \"update_start_date\": false\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Bloqueio de contrato",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"   const apiGetConsultaContratos = {\r",
+													"      url: pm.environment.get(\"URLRBXv1\"),\r",
+													"      method: 'GET',\r",
+													"      header: {\r",
+													"         'content-type': 'application/json',\r",
+													"      },\r",
+													"      body: {\r",
+													"         mode: 'raw',\r",
+													"         raw: JSON.stringify({\r",
+													"            \"ConsultaContratos\": {\r",
+													"               \"Autenticacao\": {\r",
+													"                  \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"               },\r",
+													"               \"Filtro\": \"Situacao_Codigo = 'A'\"\r",
+													"            }\r",
+													"         })\r",
+													"      }\r",
+													"   };\r",
+													"\r",
+													"   pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"      if (err) {\r",
+													"         console.log(\"Erro ao consultar contratos:\", err);\r",
+													"         return;\r",
+													"      }\r",
+													"    var jsonData = response.json();\r",
+													"    // Verifica se há dados na chave \"result\"\r",
+													"    if (jsonData.result && jsonData.result.length > 0) {\r",
+													"        // Escolhe um índice aleatório dentro do array de resultados\r",
+													"        var randomIndex = Math.floor(Math.random() * jsonData.result.length);\r",
+													"    \r",
+													"        // Obtém o registro aleatório\r",
+													"        var randomRecord = jsonData.result[randomIndex];\r",
+													"    \r",
+													"        // Obtém os valores desejados\r",
+													"        var codigoClienteCadastro = randomRecord.Cliente_Codigo;\r",
+													"        var numeroContrato = randomRecord.Numero;\r",
+													"    \r",
+													"        // Salva nas variáveis globais do Postman\r",
+													"        pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"        pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"    \r",
+													"        // Log para verificação\r",
+													"        console.log(\"Registro selecionado aleatoriamente:\", randomRecord);\r",
+													"        console.log(\"Cliente_Codigo:\", codigoClienteCadastro);\r",
+													"        console.log(\"Numero:\", numeroContrato);\r",
+													"    } else {\r",
+													"        console.log(\"Nenhum resultado encontrado.\");\r",
+													"}\r",
+													"\r",
+													"\r",
+													"   });"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const apiPostDesbloqueiaContrato = {\r",
+													"   url: pm.environment.get(\"URLRBXv2\"),\r",
+													"   method: 'POST',\r",
+													"   header: {\r",
+													"      'content-type': 'application/json',\r",
+													"      'authentication_key': pm.environment.get(\"chave_acesso\"),\r",
+													"   },\r",
+													"   body: {\r",
+													"      mode: 'raw',\r",
+													"      raw: JSON.stringify({\r",
+													"         \"contract_unblock\": {\r",
+													"            \"customer_id\": Number(pm.collectionVariables.get(\"codigoClienteCadastro\")),\r",
+													"            \"contract_id\": Number(pm.collectionVariables.get(\"numeroContrato\"))\r",
+													"         }\r",
+													"      })\r",
+													"   }\r",
+													"};\r",
+													"\r",
+													"// Envia a requisição para encerrar o pedido\r",
+													"pm.sendRequest(apiPostDesbloqueiaContrato, function (err, response) {\r",
+													"   if (err) {\r",
+													"      console.log(\"Erro ao desbloquear contrato:\", err);\r",
+													"      return;\r",
+													"   }\r",
+													"\r",
+													"   console.log(\"Contrato desbloqueado:\", response.json());\r",
+													"});\r",
+													"\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Bloqueio de contrato\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se o retorno tem o código do cliente criado\r",
+													"    pm.expect(jsonData.result).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_block\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}}\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Bloqueio de contrato já bloqueado",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.unset(\"codigoClienteCadastro\");\r",
+													"pm.collectionVariables.unset(\"numeroContrato\");\r",
+													"\r",
+													"   const apiGetConsultaContratos = {\r",
+													"      url: pm.environment.get(\"URLRBXv1\"),\r",
+													"      method: 'GET',\r",
+													"      header: {\r",
+													"         'content-type': 'application/json',\r",
+													"      },\r",
+													"      body: {\r",
+													"         mode: 'raw',\r",
+													"         raw: JSON.stringify({\r",
+													"            \"ConsultaContratos\": {\r",
+													"               \"Autenticacao\": {\r",
+													"                  \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"               },\r",
+													"               \"Filtro\": \"Situacao_Codigo  = 'B'\"\r",
+													"            }\r",
+													"         })\r",
+													"      }\r",
+													"   };\r",
+													"\r",
+													"   pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"      if (err) {\r",
+													"         console.log(\"Erro ao consultar contratos:\", err);\r",
+													"         return;\r",
+													"      }\r",
+													"    var jsonData = response.json();\r",
+													"    // Verifica se há dados na chave \"result\"\r",
+													"    if (jsonData.result && jsonData.result.length > 0) {\r",
+													"        // Escolhe um índice aleatório dentro do array de resultados\r",
+													"        var randomIndex = Math.floor(Math.random() * jsonData.result.length);\r",
+													"    \r",
+													"        // Obtém o registro aleatório\r",
+													"        var randomRecord = jsonData.result[randomIndex];\r",
+													"    \r",
+													"        // Obtém os valores desejados\r",
+													"        var codigoClienteCadastro = randomRecord.Cliente_Codigo;\r",
+													"        var numeroContrato = randomRecord.Numero;\r",
+													"    \r",
+													"        // Salva nas variáveis globais do Postman\r",
+													"        pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"        pm.collectionVariables.set(\"numeroContrato\", numeroContrato);\r",
+													"    \r",
+													"        // Log para verificação\r",
+													"        console.log(\"Registro selecionado aleatoriamente:\", randomRecord);\r",
+													"        console.log(\"Cliente_Codigo:\", codigoClienteCadastro);\r",
+													"        console.log(\"Numero:\", numeroContrato);\r",
+													"    } else {\r",
+													"        console.log(\"Nenhum resultado encontrado.\");\r",
+													"}\r",
+													"\r",
+													"\r",
+													"   });"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Bloqueio de contrato já bloqueado\", function () {\r",
+													"    //Valida se o retorno foi 412\r",
+													"    pm.response.to.have.status(412);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.error_description).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "authentication_key",
+												"value": "YZH0R2FKCXBBVMT74UI2XAUOGKCEAC",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"contract_block\": {\r\n      \"customer_id\": {{codigoClienteCadastro}},\r\n      \"contract_id\": {{numeroContrato}}\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv2}}",
+											"host": [
+												"{{URLRBXv2}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "Contratos - Consulta",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Consulta\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o código do cliente\r",
+													"    pm.expect(jsonData.result[0].Cliente_Codigo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaContratos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Consulta com filtro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Consulta com filtro\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o código do cliente\r",
+													"    pm.expect(jsonData.result[0].Cliente_Codigo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.set(\"randomFirstName\", pm.variables.replaceIn(\"{{$randomFirstName}}\"));\r",
+													"pm.collectionVariables.set(\"randomLastName\", pm.variables.replaceIn(\"{{$randomLastName}}\"));\r",
+													"pm.collectionVariables.set(\"randomFullName\", pm.variables.replaceIn(\"{{$randomFullName}}\"));\r",
+													"pm.collectionVariables.set(\"randomEmail\", pm.variables.replaceIn(\"{{$randomEmail}}\"));\r",
+													"pm.collectionVariables.unset(\"numeroPedido\");\r",
+													"pm.collectionVariables.unset(\"codigoClienteCadastro\");\r",
+													"\r",
+													"const apiPostClientes = {\r",
+													"   url: pm.environment.get(\"URLRBXv1\"),\r",
+													"   method: 'POST',\r",
+													"   header: {\r",
+													"      'content-type': 'application/json',\r",
+													"   },\r",
+													"   body: {\r",
+													"      mode: 'raw',\r",
+													"      raw: JSON.stringify({\r",
+													"         \"ClienteCadastro\": {\r",
+													"            \"Autenticacao\": {\r",
+													"               \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"            },\r",
+													"            \"DadosCliente\": {\r",
+													"               \"TipoPessoa\": \"F\",\r",
+													"               \"CPF\": pm.collectionVariables.get(\"cpf\"),\r",
+													"               \"Nome\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"               \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"               \"EndNumero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"               \"Bairro\": \"Centro\",\r",
+													"               \"CodMunicipio\": \"4114807\",\r",
+													"               \"UF\": \"PR\",\r",
+													"               \"CEP\": \"86990000\",\r",
+													"               \"TipoImpressao\": \"C\",\r",
+													"               \"Email\": pm.collectionVariables.get(\"randomEmail\"),\r",
+													"               \"TipoAssinante\": \"3\",\r",
+													"               \"TipoConta\": \"POS\"\r",
+													"            }\r",
+													"         }\r",
+													"      })\r",
+													"   }\r",
+													"};\r",
+													"\r",
+													"pm.sendRequest(apiPostClientes, function (err, response) {\r",
+													"   if (err) {\r",
+													"      console.log(\"Erro na criação do cliente:\", err);\r",
+													"      return;\r",
+													"   }\r",
+													"\r",
+													"   var jsonData = response.json();\r",
+													"   var codigoClienteCadastro = jsonData.result.CodigoCliente;\r",
+													"   pm.collectionVariables.set(\"codigoClienteCadastro\", codigoClienteCadastro);\r",
+													"   console.log(\"Cliente cadastrado:\", codigoClienteCadastro);\r",
+													"\r",
+													"   setTimeout(function () {\r",
+													"      const apiPostPedido = {\r",
+													"         url: pm.environment.get(\"URLRBXv1\"),\r",
+													"         method: 'POST',\r",
+													"         header: {\r",
+													"            'content-type': 'application/json',\r",
+													"         },\r",
+													"         body: {\r",
+													"            mode: 'raw',\r",
+													"            raw: JSON.stringify({\r",
+													"               \"PedidoCadastro\": {\r",
+													"                  \"Autenticacao\": {\r",
+													"                     \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"                  },\r",
+													"                  \"DadosPedido\": {\r",
+													"                     \"Geral\": {\r",
+													"                        \"Cliente\": pm.collectionVariables.get(\"codigoClienteCadastro\"),\r",
+													"                        \"TipoCliente\": \"C\",\r",
+													"                        \"CicloFat\": \"1\",\r",
+													"                        \"Assinatura\": \"2023-12-01\",\r",
+													"                        \"Vendedor\": \"jonatas\",\r",
+													"                        \"Usuario\": \"jonatas\"\r",
+													"                     },\r",
+													"                     \"EnderecoInstalacao\": {\r",
+													"                        \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"                        \"Numero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"                        \"Complemento\": \"\",\r",
+													"                        \"Bairro\": \"Centro\",\r",
+													"                        \"CodMunicipio\": \"4114807\",\r",
+													"                        \"UF\": \"PR\",\r",
+													"                        \"CEP\": \"86990000\"\r",
+													"                     },\r",
+													"                     \"EnderecoCobranca\": {\r",
+													"                        \"Endereco\": pm.collectionVariables.get(\"randomFullName\"),\r",
+													"                        \"Numero\": pm.collectionVariables.get(\"numeroAleatorio4Casas\"),\r",
+													"                        \"Complemento\": \"\",\r",
+													"                        \"Bairro\": \"Jardim Alameda\",\r",
+													"                        \"CodMunicipio\": \"4114807\",\r",
+													"                        \"UF\": \"PR\",\r",
+													"                        \"CEP\": \"86990000\"\r",
+													"                     },\r",
+													"                     \"Itens\": {\r",
+													"                        \"ItemP\": {\r",
+													"                           \"Tipo\": \"P\",\r",
+													"                           \"Codigo\": \"1\",\r",
+													"                           \"InicioCobranca\": \"2023-12-01\",\r",
+													"                           \"AgruparCobranca\": \"S\",\r",
+													"                           \"DescPromoPrazo\": \"12\",\r",
+													"                           \"DescPromoValor\": -10,\r",
+													"                           \"DescPromoDesc\": \"DESCONTO PROMOCIONAL\"\r",
+													"                        }\r",
+													"                     }\r",
+													"                  }\r",
+													"               }\r",
+													"            })\r",
+													"         }\r",
+													"      };\r",
+													"      pm.sendRequest(apiPostPedido, function (err, response) {\r",
+													"         if (err) {\r",
+													"            console.log(\"Erro na criação do pedido:\", err);\r",
+													"            return;\r",
+													"         }\r",
+													"\r",
+													"         var jsonData = response.json();\r",
+													"         var numeroPedido = jsonData.result.NumeroPedido;\r",
+													"         pm.collectionVariables.set(\"numeroPedido\", numeroPedido);\r",
+													"         console.log(\"Pedido criado:\", numeroPedido);\r",
+													"\r",
+													"         setTimeout(function () {\r",
+													"            const apiPostEncerraPedido = {\r",
+													"               url: pm.environment.get(\"URLRBXv2\"),\r",
+													"               method: 'POST',\r",
+													"               header: {\r",
+													"                  'content-type': 'application/json',\r",
+													"                  'authentication_key': pm.environment.get(\"chave_acesso\"),\r",
+													"               },\r",
+													"               body: {\r",
+													"                  mode: 'raw',\r",
+													"                  raw: JSON.stringify({\r",
+													"                     \"order_finish\": {\r",
+													"                        \"order_id\": pm.collectionVariables.get(\"numeroPedido\")\r",
+													"                     }\r",
+													"                  }\r",
+													"                  )\r",
+													"               }\r",
+													"            };\r",
+													"            pm.sendRequest(apiPostEncerraPedido, function (err, response) {\r",
+													"               if (err) {\r",
+													"                  console.log(\"Erro ao encerrar o pedido:\", err);\r",
+													"                  return;\r",
+													"               }\r",
+													"\r",
+													"               console.log(\"Pedido encerrado:\", response.json());\r",
+													"\r",
+													"               setTimeout(function () {\r",
+													"                  const apiPostGeraContratoPedido = {\r",
+													"                     url: pm.environment.get(\"URLRBXv2\"),\r",
+													"                     method: 'POST',\r",
+													"                     header: {\r",
+													"                        'content-type': 'application/json',\r",
+													"                        'authentication_key': pm.environment.get(\"chave_acesso\"),\r",
+													"                     },\r",
+													"                     body: {\r",
+													"                        mode: 'raw',\r",
+													"                        raw: JSON.stringify({\r",
+													"                           \"order_generate_contracts\": {\r",
+													"                              \"order_id\": pm.collectionVariables.get(\"numeroPedido\")\r",
+													"                           }\r",
+													"                        }\r",
+													"                        )\r",
+													"                     }\r",
+													"                  };\r",
+													"                  pm.sendRequest(apiPostGeraContratoPedido, function (err, response) {\r",
+													"                     if (err) {\r",
+													"                        console.log(\"Erro ao gerar contrato:\", err);\r",
+													"                        return;\r",
+													"                     }\r",
+													"\r",
+													"                     console.log(\"Contrato gerado:\", response.json());\r",
+													"\r",
+													"                     setTimeout(function () {\r",
+													"                        const apiGetConsultaContratos = {\r",
+													"                           url: pm.environment.get(\"URLRBXv1\"),\r",
+													"                           method: 'GET',\r",
+													"                           header: {\r",
+													"                              'content-type': 'application/json',\r",
+													"                           },\r",
+													"                           body: {\r",
+													"                              mode: 'raw',\r",
+													"                              raw: JSON.stringify({\r",
+													"                                 \"ConsultaContratos\": {\r",
+													"                                    \"Autenticacao\": {\r",
+													"                                       \"ChaveIntegracao\": pm.environment.get(\"chave_acesso\")\r",
+													"                                    },\r",
+													"                                    \"Filtro\": \"Cliente_Codigo =\" + pm.collectionVariables.get(\"codigoClienteCadastro\")\r",
+													"                                 }\r",
+													"                              })\r",
+													"                           }\r",
+													"                        };\r",
+													"\r",
+													"                        pm.sendRequest(apiGetConsultaContratos, function (err, response) {\r",
+													"                           if (err) {\r",
+													"                              console.log(\"Erro ao consultar contratos:\", err);\r",
+													"                              return;\r",
+													"                           }\r",
+													"                           var jsonData = response.json();\r",
+													"                           var numeroContrato = jsonData.result[0].Numero;\r",
+													"                           pm.collectionVariables.set(\"numeroPedido\", numeroContrato);\r",
+													"\r",
+													"                           console.log(\"Consulta Contratos:\", response.json());\r",
+													"                        }, 3000)\r",
+													"                     });\r",
+													"                  });\r",
+													"               }, 3000);\r",
+													"\r",
+													"            });\r",
+													"         }, 3000);\r",
+													"\r",
+													"      });\r",
+													"   }, 3000);\r",
+													"\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaContratos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Cliente_Codigo = '{{codigoClienteCadastro}}'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Consulta com filtro inexistente",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Consulta com filtro inexistente\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaContratos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Cliente_Codig = '1'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Contratos - Consulta contratos bloqueados",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Contratos - Consulta contratos bloqueados\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o o nome do cliente\r",
+													"    pm.expect(jsonData.result[0].Cliente_Nome).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaContratosBloqueados\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Atendimentos",
+					"item": [
+						{
+							"name": "POST",
+							"item": [
+								{
+									"name": "Atendimentos - Cadastro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Cadastro OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o número do atendimento\r",
+													"    pm.expect(jsonData.result.NumeroAtendimento).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"AtendimentoCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosAtendimento\": {\r\n         \"Data_Abertura\": \"2023-12-01\",\r\n         \"Hora_Abertura\": \"10:00:00\",\r\n         \"Iniciativa\": \"C\",\r\n         \"Modo\": \"T\",\r\n         \"TipoCliente\": \"C\",\r\n         \"Cliente\": \"3\",\r\n         \"Contrato\": \"1\",\r\n         \"Contato\": \"\",\r\n         \"Prioridade\": \"1\",\r\n         \"Situacao\": \"A\",\r\n         \"Tipo\": \"T\",\r\n         \"Topico\": \"2\",\r\n         \"Assunto\": \"Sem internet\",\r\n         \"Usuario_Abertura\": \"jonatas\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Cadastro campo obrigatório nulo",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Cadastro campo obrigatório nulo\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"AtendimentoCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosAtendimento\": {\r\n         \"Data_Abertura\": null,\r\n         \"Hora_Abertura\": \"10:00:00\",\r\n         \"Iniciativa\": \"C\",\r\n         \"Modo\": \"T\",\r\n         \"TipoCliente\": \"C\",\r\n         \"Cliente\": \"3\",\r\n         \"Contrato\": \"1\",\r\n         \"Contato\": \"\",\r\n         \"Prioridade\": \"1\",\r\n         \"Situacao\": \"A\",\r\n         \"Tipo\": \"T\",\r\n         \"Topico\": \"2\",\r\n         \"Assunto\": \"Sem internet\",\r\n         \"Usuario_Abertura\": \"jonatas\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Cadastro campo obrigatório vazio",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Cadastro campo obrigatório vazio\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"AtendimentoCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosAtendimento\": {\r\n         \"Data_Abertura\": \"\",\r\n         \"Hora_Abertura\": \"10:00:00\",\r\n         \"Iniciativa\": \"C\",\r\n         \"Modo\": \"T\",\r\n         \"TipoCliente\": \"C\",\r\n         \"Cliente\": \"3\",\r\n         \"Contrato\": \"1\",\r\n         \"Contato\": \"\",\r\n         \"Prioridade\": \"1\",\r\n         \"Situacao\": \"A\",\r\n         \"Tipo\": \"T\",\r\n         \"Topico\": \"2\",\r\n         \"Assunto\": \"Sem internet\",\r\n         \"Usuario_Abertura\": \"jonatas\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Cadastro usuário de abertura inexistente",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Cadastro usuário de abertura inexistente\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"AtendimentoCadastro\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"DadosAtendimento\": {\r\n         \"Data_Abertura\": \"2023-12-01\",\r\n         \"Hora_Abertura\": \"10:00:00\",\r\n         \"Iniciativa\": \"C\",\r\n         \"Modo\": \"T\",\r\n         \"TipoCliente\": \"C\",\r\n         \"Cliente\": \"3\",\r\n         \"Contrato\": \"1\",\r\n         \"Contato\": \"\",\r\n         \"Prioridade\": \"1\",\r\n         \"Situacao\": \"A\",\r\n         \"Tipo\": \"T\",\r\n         \"Topico\": \"2\",\r\n         \"Assunto\": \"Sem internet\",\r\n         \"Usuario_Abertura\": \"inexistente\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "GET",
+							"item": [
+								{
+									"name": "Atendimentos - Consulta sem filtro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Consulta sem filtro OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o protocolo do atendimento\r",
+													"    pm.expect(jsonData.result[0].Protocolo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaAtendimentos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      }\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Consulta com filtro",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Consulta com filtro OK?\", function () {\r",
+													"    //Valida se o retorno foi 200\r",
+													"    pm.response.to.have.status(200);\r",
+													"    //Valida se no primeiro registro do array result retorna o protocolo do atendimento\r",
+													"    pm.expect(jsonData.result[0].Protocolo).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"    //Valida se o status no retorno do json é 1\r",
+													"    pm.expect(jsonData.status).to.equals(1);\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaAtendimentos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Atendimentos.Cliente = '3'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Consulta com filtro inválido",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Consulta com filtro inválido\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaAtendimentos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Atendimentos.Clien = '3'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Atendimentos - Consulta código informado no filtro inexistente",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"//Salva o json retornado na execução da API\r",
+													"var jsonData = pm.response.json();\r",
+													"\r",
+													"\r",
+													"pm.test(\"Atendimentos - Código informado no filtro inexistente\", function () {\r",
+													"    //Valida se o retorno foi 500\r",
+													"    pm.response.to.have.status(500);\r",
+													"    //Valida se o status no retorno do json é 0\r",
+													"    pm.expect(jsonData.status).to.equals(0);\r",
+													"    //Valida se o retorno tem a descrição do erro\r",
+													"    pm.expect(jsonData.erro_desc).to.be.a(\"string\").and.to.not.be.empty;\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n   \"ConsultaAtendimentos\": {\r\n      \"Autenticacao\": {\r\n         \"ChaveIntegracao\": \"{{chave_acesso}}\"\r\n      },\r\n      \"Filtro\": \"Atendimentos.Cliente = '99999'\"\r\n   }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{URLRBXv1}}",
+											"host": [
+												"{{URLRBXv1}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Gerar números aleatórios\r",
+					"function geraNumerosAleatorios(qtdeNumeros) {\r",
+					"  var text = \"\";\r",
+					"  var possible = \"0123456789\";\r",
+					"\r",
+					"  for (var i = 0; i < qtdeNumeros; i++)\r",
+					"    text += possible.charAt(Math.floor(Math.random() * possible.length));\r",
+					"\r",
+					"  return text;\r",
+					"}\r",
+					"\r",
+					"// Gerar CNPJ válido sem máscara\r",
+					"function mod(dividendo,divisor) {\r",
+					"          return Math.round(dividendo - (Math.floor(dividendo/divisor)*divisor));\r",
+					"}\r",
+					"function geraCnpj() {\r",
+					"        var n = 9;\r",
+					"        var n1  = geraNumerosAleatorios(1);\r",
+					"        var n2  = geraNumerosAleatorios(1);\r",
+					"        var n3  = geraNumerosAleatorios(1);\r",
+					"        var n4  = geraNumerosAleatorios(1);\r",
+					"        var n5  = geraNumerosAleatorios(1);\r",
+					"        var n6  = geraNumerosAleatorios(1);\r",
+					"        var n7  = geraNumerosAleatorios(1);\r",
+					"        var n8  = geraNumerosAleatorios(1);\r",
+					"        var n9  = 0;\r",
+					"        var n10 = 0;\r",
+					"        var n11 = 0;\r",
+					"        var n12 = 1;\r",
+					"        var d1 = n12*2+n11*3+n10*4+n9*5+n8*6+n7*7+n6*8+n5*9+n4*2+n3*3+n2*4+n1*5;\r",
+					"           d1 = 11 - ( mod(d1,11) );\r",
+					"           if (d1>=10) d1 = 0;\r",
+					"        var d2 = d1*2+n12*3+n11*4+n10*5+n9*6+n8*7+n7*8+n6*9+n5*2+n4*3+n3*4+n2*5+n1*6;\r",
+					"           d2 = 11 - ( mod(d2,11) );\r",
+					"           if (d2>=10) d2 = 0;\r",
+					"           return ''+n1+n2+n3+n4+n5+n6+n7+n8+n9+n10+n11+n12+d1+d2;\r",
+					"}\r",
+					"\r",
+					"// CNPJ - tipos de CNPJs válidos sem máscara\r",
+					"pm.collectionVariables.set(\"cnpj\", geraCnpj());\r",
+					"\r",
+					"// CNPJ - tipos de CNPJs válidos com máscara\r",
+					"var cnpjMascara = geraCnpj().replace(/^(\\d{2})(\\d{3})(\\d{3})(\\d{4})(\\d{2})/, \"$1.$2.$3/$4-$5\");\r",
+					"pm.collectionVariables.set(\"cnpjMascara\", cnpjMascara);\r",
+					"\r",
+					"// Tipos de números aleatórios\r",
+					"pm.collectionVariables.set(\"numeroAleatorio2Casas\", geraNumerosAleatorios(2));\r",
+					"pm.collectionVariables.set(\"numeroAleatorio4Casas\", geraNumerosAleatorios(4));\r",
+					"\r",
+					"\r",
+					"// Gerar CPF válido sem máscara\r",
+					"function mod(dividendo, divisor) {\r",
+					"    return Math.round(dividendo - Math.floor(dividendo / divisor) * divisor);\r",
+					"}\r",
+					"\r",
+					"function geraNumerosAleatorios(qtdNumeros) {\r",
+					"    var numeros = '';\r",
+					"    for (var i = 0; i < qtdNumeros; i++) {\r",
+					"        numeros += Math.floor(Math.random() * 10);\r",
+					"    }\r",
+					"    return numeros;\r",
+					"}\r",
+					"\r",
+					"function geraCPF() {\r",
+					"    var n = 9;\r",
+					"    var n1 = geraNumerosAleatorios(1);\r",
+					"    var n2 = geraNumerosAleatorios(1);\r",
+					"    var n3 = geraNumerosAleatorios(1);\r",
+					"    var n4 = geraNumerosAleatorios(1);\r",
+					"    var n5 = geraNumerosAleatorios(1);\r",
+					"    var n6 = geraNumerosAleatorios(1);\r",
+					"    var n7 = geraNumerosAleatorios(1);\r",
+					"    var n8 = geraNumerosAleatorios(1);\r",
+					"    var n9 = geraNumerosAleatorios(1);\r",
+					"    var d1 = n9 * 2 + n8 * 3 + n7 * 4 + n6 * 5 + n5 * 6 + n4 * 7 + n3 * 8 + n2 * 9 + n1 * 10;\r",
+					"    d1 = 11 - mod(d1, 11);\r",
+					"    if (d1 >= 10) d1 = 0;\r",
+					"    var d2 = d1 * 2 + n9 * 3 + n8 * 4 + n7 * 5 + n6 * 6 + n5 * 7 + n4 * 8 + n3 * 9 + n2 * 10 + n1 * 11;\r",
+					"    d2 = 11 - mod(d2, 11);\r",
+					"    if (d2 >= 10) d2 = 0;\r",
+					"    return '' + n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8 + n9 + d1 + d2;\r",
+					"}\r",
+					"\r",
+					"// CPF - Tipos de CPF válidos se máscara\r",
+					"pm.collectionVariables.set(\"cpf\", geraCPF());\r",
+					"pm.collectionVariables.set(\"cpf2\", geraCPF());\r",
+					"\r",
+					"// CPF - tipos de CPF válidos com máscara\r",
+					"var cpfMascara = geraCPF().replace(/^(\\d{3})(\\d{3})(\\d{3})(\\d{2})$/, \"$1.$2.$3-$4\");\r",
+					"pm.collectionVariables.set(\"cpfMascara\", cpfMascara);\r",
+					"\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "cnpj",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cnpjMascara",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "numeroAleatorio2Casas",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "numeroAleatorio4Casas",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cpf",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cpf2",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cpfMascara",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "erroDescricao",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "erroDetalhe",
+			"value": ""
+		},
+		{
+			"key": "randomFirstName",
+			"value": ""
+		},
+		{
+			"key": "randomLastName",
+			"value": ""
+		},
+		{
+			"key": "randomFullName",
+			"value": ""
+		},
+		{
+			"key": "randomEmail",
+			"value": ""
+		},
+		{
+			"key": "numeroPedido",
+			"value": ""
+		},
+		{
+			"key": "codigoClienteCadastro",
+			"value": ""
+		},
+		{
+			"key": "numeroContrato",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

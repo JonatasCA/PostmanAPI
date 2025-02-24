@@ -1,0 +1,33 @@
+{
+	"id": "eca8bd7a-0434-41f3-ac3d-106977b0919b",
+	"name": "DEV",
+	"values": [
+		{
+			"key": "URL",
+			"value": "https://dummyjson.com",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "URLRBXv1",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "chave_acesso",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "URLRBXv2",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-02-24T19:00:37.524Z",
+	"_postman_exported_using": "Postman/11.33.5"
+}
