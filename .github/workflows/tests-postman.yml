@@ -46,17 +46,11 @@ jobs:
           path: reports
 
       - name: 🚀 Publicar no GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: reports
           publish_branch: gh-pages
           keep_files: true  
-
-      - name: Descobrir diretório dinâmico
-        run: echo "TARGET_DIR=$(ls -d /home/runner/actions_github_pages_*)" >> $GITHUB_ENV
-        
-      - name: Copiar relatórios
-        run: cp -r $GITHUB_WORKSPACE/reports/* $TARGET_DIR/
         
 
