@@ -1,13 +1,12 @@
 # 📌 Automação de Testes de API com Postman e Newman
 
-Este projeto demonstra técnicas de automação de testes de API utilizando **Postman** e **Newman CLI**, além de integração com **GitHub Actions** para execução automática dos testes e publicação de relatórios via **GitHub Pages**.
+Este projeto demonstra técnicas de automação de testes de API utilizando **Postman** e **Newman CLI**, além de integração com **GitHub Actions** para execução automática dos testes.
 
 ## 🚀 Tecnologias Utilizadas
 
 - **Postman** → Criação e execução de testes de API  
 - **Newman CLI** → Execução dos testes via linha de comando  
-- **GitHub Actions** → Automação dos testes a cada commit  
-- **GitHub Pages** → Publicação de relatórios de testes  
+- **GitHub Actions** → Automação dos testes a cada commit   
 
 ## 👤 Estrutura do Projeto
 
@@ -57,28 +56,20 @@ Toda vez que um commit for feito, os testes serão executados automaticamente vi
 
 ### 📌 O que o Workflow faz?
 
-- Instala o **Node.js** e o **Newman**.  
-- Executa os testes da collection do **Postman**.  
-- Gera um relatório HTML dos testes.  
-- Publica o relatório no **GitHub Pages**.  
+- Instala o **Node.js**.  
+- Instala o **Newman**.  
+- Executa os testes da collection do **Postman**.    
 
 ### 📌 Como visualizar os testes no GitHub Actions?
 
 1. Vá até a aba **"Actions"** no repositório do GitHub.  
-2. Clique no workflow **"Testes do Postman e Publicação no GitHub Pages"**.  
+2. Clique no workflow **"Testes do Postman**.  
 3. Veja os logs da execução e os testes realizados.  
-
-## 🌍 Acessar os Relatórios no GitHub Pages
-
-Após a execução do workflow, o relatório HTML estará disponível em:
-
-[https://JonatasCA.github.io/PostmanAPI/newman-report.html](https://JonatasCA.github.io/PostmanAPI/newman-report.html)
 
 ## 🛠️ Principais Funcionalidades
 
 ✅ Automação completa dos testes de API via **Postman** e **Newman**  
 ✅ Execução local e remota via **GitHub Actions**  
-✅ Publicação automática dos relatórios no **GitHub Pages**  
 ✅ Validação de **status code**, **response time** e **resposta da API**  
 ✅ Uso de **variáveis dinâmicas** e **ambientes** no Postman  
 
