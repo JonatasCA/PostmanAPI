@@ -63,9 +63,6 @@ jobs:
       - name: 📂 Depuração - Mostrar Caminho Absoluto
         run: pwd && ls -R
 
-      - name: 🔄 Mover Relatório para o Local Esperado
-        run: mv reports /home/runner/work/PostmanAPI/PostmanAPI/
-
       - name: 🚀 Publicar no GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
