@@ -23,6 +23,9 @@ jobs:
       - name: 📦 Instalar Newman
         run: npm install -g newman
 
+      - name: Instalar Newman reporter
+        run: npm install -g newman-reporter-html
+
       - name: 🚀 Executar Testes e Gerar Relatório HTML
         run: newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html --reporter-html-export reports/newman-report.html
 
