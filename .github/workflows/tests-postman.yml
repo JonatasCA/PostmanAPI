@@ -60,10 +60,16 @@ jobs:
       - name: 📂 Listar arquivos baixados
         run: ls -l reports
 
+      - name: 📂 Depuração - Mostrar Caminho Absoluto
+        run: pwd && ls -R
+
+      - name: 🔄 Mover Relatório para o Local Esperado
+        run: mv reports /home/runner/work/PostmanAPI/PostmanAPI/
+
       - name: 🚀 Publicar no GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: reports
+          publish_dir: ./reports
           publish_branch: gh-pages
           keep_files: true  
