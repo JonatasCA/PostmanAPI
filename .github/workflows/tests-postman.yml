@@ -52,3 +52,12 @@ jobs:
           publish_dir: reports
           publish_branch: gh-pages
           keep_files: true  
+
+      - name: Exibir estrutura de diretórios (Debug)
+        run: |
+          echo "Workspace: $GITHUB_WORKSPACE"
+          ls -la $GITHUB_WORKSPACE
+  
+      - name: Copiar relatórios
+        run: cp -r $GITHUB_WORKSPACE/reports /home/runner/actions_github_pages_1740442073712
+
