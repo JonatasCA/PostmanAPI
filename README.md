@@ -12,7 +12,7 @@ Este projeto demonstra técnicas de automação de testes de API utilizando **Po
 ## 👤 Estrutura do Projeto
 
 ```
-💟 MeuProjetoAPITests  
+💟 PostmanAPI  
 │── 📂 .github/workflows/    # Configuração do GitHub Actions  
 │── 📂 reports/              # Relatórios gerados pelo Newman  
 │── PDIProjectCollection.json    # Collection de testes  
