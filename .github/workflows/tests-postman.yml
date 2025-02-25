@@ -27,7 +27,9 @@ jobs:
         run: npm install -g newman-reporter-html
 
       - name: 🚀 Executar Testes e Gerar Relatório HTML
-        run: newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html --reporter-html-export reports/newman-report.html
+        run: |
+          mkdir -p reports
+          newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html --reporter-html-export reports/newman-report.html
 
       - name: 🚀 Configurar GitHub Pages
         uses: actions/upload-artifact@v4
@@ -43,11 +45,20 @@ jobs:
       - name: 📥 Clonar repositório
         uses: actions/checkout@v3
 
+      - name: 📂 Criar pasta reports caso não exista
+        run: mkdir -p reports
+
       - name: 📥 Baixar o Relatório Gerado
         uses: actions/download-artifact@v4
         with:
           name: newman-report
-          path: reports
+          path: .
+
+      - name: 📂 Mover Relatório para reports/
+        run: mv newman-report.html reports/
+
+      - name: 📂 Listar arquivos baixados
+        run: ls -l reports
 
       - name: 🚀 Publicar no GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -56,5 +67,3 @@ jobs:
           publish_dir: reports
           publish_branch: gh-pages
           keep_files: true  
-        
-
