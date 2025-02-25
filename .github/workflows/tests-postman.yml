@@ -1,4 +1,4 @@
-name: Testes do Postman e Publicação no GitHub Pages
+name: Testes do Postman
 
 on:
   push:
@@ -26,47 +26,10 @@ jobs:
       - name: Instalar Newman reporter
         run: npm install -g newman-reporter-html
 
-      - name: 🚀 Executar Testes e Gerar Relatório HTML
+      - name: 🚀 Executar Testes 
         run: |
           mkdir -p reports
-          newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json -r cli,html --reporter-html-export reports/newman-report.html
+          newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json
 
-      - name: 🚀 Configurar GitHub Pages
-        uses: actions/upload-artifact@v4
-        with:
-          name: newman-report
-          path: reports/newman-report.html
 
-  deploy-github-pages:
-    needs: run-postman-tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 Clonar repositório
-        uses: actions/checkout@v3
-
-      - name: 📂 Criar pasta reports caso não exista
-        run: mkdir -p reports
-
-      - name: 📥 Baixar o Relatório Gerado
-        uses: actions/download-artifact@v4
-        with:
-          name: newman-report
-          path: .
-
-      - name: 📂 Mover Relatório para reports/
-        run: mv newman-report.html reports/
-
-      - name: 📂 Listar arquivos baixados
-        run: ls -l reports
-
-      - name: 📂 Depuração - Mostrar Caminho Absoluto
-        run: pwd && ls -R
-
-      - name: 🚀 Publicar no GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports
-          publish_branch: gh-pages
-          keep_files: true  
+ 
