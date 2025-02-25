@@ -21,12 +21,16 @@ Este projeto demonstra técnicas de automação de testes de API utilizando **Po
 
 ## ▶️ Como Executar os Testes Localmente
 
-### 1️⃣ Instalar o Node.js e o Newman
+### 1️⃣ Instalar o Newman e o Newman Reporter
 
-Antes de rodar os testes, você precisa ter o **Node.js** instalado. Depois, instale o **Newman** globalmente:
+Para executar os testes, é necessário ter o **Node.js** instalado. 
+Agora instale o **Newman** e **Newman Reporter** globalmente:
 
 ```sh
 npm install -g newman
+```
+```sh
+npm install -g newman-reporter-html
 ```
 
 ### 2️⃣ Clonar o Repositório
@@ -38,7 +42,7 @@ cd PostmanAPI
 
 ### 3️⃣ Executar os Testes com o Newman
 
-Para rodar os testes da collection:
+Para executar os testes da collection:
 
 ```sh
 newman run PDIProjectCollection.json -e PDIProjectEnviromentDEV.json
